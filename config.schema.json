@@ -14,12 +14,17 @@
       "ip": {
         "title": "TV ip address",
         "type": "string",
-        "required": true
+        "required": false
       },
       "mac": {
         "title": "TV mac address",
         "type": "string",
         "required": true
+      },
+      "wifiMac": {
+          "title": "The Wi-Fi mac address",
+          "type": "string",
+          "required": false
       },
       "broadcastAdr": {
         "title": "Broadcast address",

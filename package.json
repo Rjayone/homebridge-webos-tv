@@ -21,10 +21,13 @@
   "license": "MIT",
   "dependencies": {
     "lgtv2": "^1.4.1",
-    "wake_on_lan": "^0.0.4",
-    "tcp-ping": "^0.1.1",
+    "local-devices": "^2.0.0",
     "mkdirp": "^0.5.1",
-    "persist-path": "^1.0.2"
+    "package": "^1.0.1",
+    "packages": "0.0.8",
+    "persist-path": "^1.0.2",
+    "tcp-ping": "^0.1.1",
+    "wake_on_lan": "0.0.4"
   },
   "repository": {
     "type": "git",

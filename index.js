@@ -4,6 +4,7 @@ const tcpp = require('tcp-ping');
 const fs = require('fs');
 const ppath = require('persist-path');
 const mkdirp = require('mkdirp');
+const localDevices = require('local-devices')
 
 let Service;
 let Characteristic;
@@ -19,13 +20,30 @@ module.exports = function(homebridge) {
 };
 
 
+// Find all local network devices.
+function findDevice(mac) {
+	localDevices().then(devices => { devices 
+        devices.forEach(function(item) {
+            if (item.mac == mac) {
+                return item
+            }
+        })
+    })
+}
+
+
 // --== MAIN SETUP ==--
 function webosTvAccessory(log, config, api) {
+	findDevices()
     this.log = log;
     this.port = 3000;
 
+    var ipAddressOfLAN = findDevice(config['mac'])
+    var ipAddressOfWiFi = findDevice(config['wifiMac'])
+
     // configuration
-    this.ip = config['ip'];
+    this.ip = ipAddressOfLAN//config['ip'];
+    this.wifiMac = config['wifiMac']
     this.name = config['name'] || 'webOS TV';
     this.mac = config['mac'];
     this.broadcastAdr = config['broadcastAdr'] || '255.255.255.255';
