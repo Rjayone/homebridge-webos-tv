@@ -1,6 +1,6 @@
 {
   "name": "homebridge-webos-tv-ext",
-  "version": "1.7",
+  "version": "1.6.1",
   "description": "Homebridge plugin for LG webOS TVs",
   "main": "index.js",
   "engines": {
@@ -17,7 +17,7 @@
     "webos",
     "homekit"
   ],
-  "author": "merdok",
+  "author": "rjayone",
   "license": "MIT",
   "dependencies": {
     "lgtv2": "^1.4.1",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/merdok/homebridge-webos-tv.git"
+    "url": "https://github.com/Rjayone/homebridge-webos-tv.git"
   },
   "bugs": {
     "url": "https://github.com/merdok/homebridge-webos-tv/issues"
