@@ -34,7 +34,6 @@ function findDevice(mac) {
 
 // --== MAIN SETUP ==--
 function webosTvAccessory(log, config, api) {
-	findDevices()
     this.log = log;
     this.port = 3000;
 
