@@ -28,7 +28,8 @@
     "persist-path": "^1.0.2",
     "tcp-ping": "^0.1.1",
     "wake_on_lan": "0.0.4",
-    "local-devices": "2.0.0"
+    "local-devices": "2.0.0",
+    "semaphore": "1.1.0"
   },
   "repository": {
     "type": "git",

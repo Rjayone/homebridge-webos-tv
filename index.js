@@ -11,25 +11,26 @@ let Characteristic;
 
 let lgtv;
 let pointerInputSocket;
-
-module.exports = function(homebridge) {
-    Service = homebridge.hap.Service;
-    Characteristic = homebridge.hap.Characteristic;
-
-    homebridge.registerAccessory('homebridge-webos-tv-ext', 'webostv', webosTvAccessory);
-};
-
+var ip;
 
 // Find all local network devices.
-function findDevice(mac) {
-	localDevices().then(devices => { devices 
+function findDevice(mac, completion) {
+    console.log('looking for mac ' + mac)
+    localDevices().then(devices => { devices 
         devices.forEach(function(item) {
             if (item.mac == mac) {
-                return item
+                completion(item.ip)
             }
         })
     })
 }
+
+module.exports = function(homebridge) {
+    Service = homebridge.hap.Service;
+    Characteristic = homebridge.hap.Characteristic;
+    homebridge.registerAccessory('homebridge-webos-tv-ext', 'webostv', webosTvAccessory);
+};
+
 
 
 // --== MAIN SETUP ==--
@@ -37,11 +38,15 @@ function webosTvAccessory(log, config, api) {
     this.log = log;
     this.port = 3000;
 
-    var ipAddressOfLAN = findDevice(config['mac'])
-    var ipAddressOfWiFi = findDevice(config['wifiMac'])
+    var sema = require('semaphore')
+    sema.take(function() {
+        findDevice(config['mac'], function(ip) {
+            this.ip = ip
+            sema.leave()
+        })
+    })
 
     // configuration
-    this.ip = ipAddressOfLAN//config['ip'];
     this.wifiMac = config['wifiMac']
     this.name = config['name'] || 'webOS TV';
     this.mac = config['mac'];
@@ -82,7 +87,6 @@ function webosTvAccessory(log, config, api) {
     this.remoteSequenceButtons = config['remoteSequenceButtons'];
 
     // prepare variables
-    this.url = 'ws://' + this.ip + ':' + this.port;
     this.enabledServices = [];
     this.connected = false;
     this.checkCount = 0;
@@ -111,13 +115,19 @@ function webosTvAccessory(log, config, api) {
     this.tvInfoFile = this.prefsDir + 'info_' + this.mac.split(':').join('');
 
     // create the lgtv instance
-    this.lgtv = new lgtv2({
-        url: this.url,
-        timeout: 5000,
-        reconnect: 3000,
-        keyFile: this.keyFile
-    });
+    console.log('start mac ' + config['mac']);
+    findDevice(config['mac'], function(ip) {
+        console.log('using ip ' + ip)
+        this.ip = ip
+        this.url = 'ws://' + this.ip + ':' + this.port;
+        this.lgtv = new lgtv2({
+            url: this.url,
+            timeout: 5000,
+            reconnect: 3000,
+            keyFile: this.keyFile
+        });
 
+        
     // start the polling
     if (!this.checkAliveInterval) {
         this.checkAliveInterval = setInterval(this.checkTVState.bind(this, this.updateTvStatus.bind(this)), this.alivePollingInterval);
@@ -165,6 +175,7 @@ function webosTvAccessory(log, config, api) {
         this.prepareTvService();
     }
 
+    })
 }
 
 
@@ -379,13 +390,13 @@ webosTvAccessory.prototype.prepareTvService = function() {
 
     // not supported in the ios beta yet?
     /* 
-	this.tvService
-	  .getCharacteristic(Characteristic.PictureMode)
-	  .on('set', function(newValue, callback) {
-		console.log('set PictureMode => setNewValue: ' + newValue);
-		callback(null);
-	  });
-	  */
+    this.tvService
+      .getCharacteristic(Characteristic.PictureMode)
+      .on('set', function(newValue, callback) {
+        console.log('set PictureMode => setNewValue: ' + newValue);
+        callback(null);
+      });
+      */
 
 
     this.enabledServices.push(this.tvService);
@@ -466,7 +477,7 @@ webosTvAccessory.prototype.prepareInputSourcesService = function() {
             appId = value;
         }
 
-        // get name		
+        // get name     
         let inputName = appId;
 
         if (savedNames && savedNames[appId]) {
@@ -1384,7 +1395,7 @@ webosTvAccessory.prototype.setRemoteControlButtonState = function(state, callbac
         this.disableAllRemoteControlButtons();
     }, 10);
     if (callback != null) { // only if callback is not null, when a sequence is fired then the sequence button press calls the callback and not this one!
-        callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes	
+        callback(); // always report success, if i return an error here then siri will respond with 'Some device are not responding' which is bad for automation or scenes  
     }
 };
 
@@ -1512,4 +1523,5 @@ webosTvAccessory.prototype.setRemoteSequenceButtonState = function(state, callba
 webosTvAccessory.prototype.getServices = function() {
     return this.enabledServices;
 };
+
 
